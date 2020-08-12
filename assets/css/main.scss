@@ -1,0 +1,11 @@
+@import '~bulma/sass/utilities/initial-variables';
+$primary: #F6A71B;
+// $navbar-breakpoint: 10000;
+@import '~bulma/bulma';
+
+// Google fonts
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap');
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+}

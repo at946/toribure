@@ -88,3 +88,8 @@ sw.*
 
 # Vim swap files
 *.swp
+
+# additional
+.ash_history
+.editorconfig
+.nuxtrc
