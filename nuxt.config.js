@@ -28,6 +28,7 @@ export default {
       { hid: 'og:image', property: 'og:image', content: 'https://toribure.herokuapp.com/ogp.png' },
       { hid: 'twitter:card', property: 'twitter:card', content: 'summary_large_image' },
       { hid: 'twitter:creator', property: 'twitter:creator', content: '@at_946' },
+      { hid: 'google-site-verification', name: 'google-site-verification', content: "V9WZccOAwvnBmRzeEdzhq9jto4S65oKS2gACDRpRbhA" },
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
