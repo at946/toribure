@@ -124,6 +124,7 @@ export default {
     create_room() {
       const room_id = Math.floor( Math.random() * 100000000 )
       this.socket.emit('check-room', room_id)
+      console.log(`create_room ${room_id}`)
     },
     reset_error() {
       this.error_theme = ""
