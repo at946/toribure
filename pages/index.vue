@@ -3,10 +3,24 @@
       <div class="column is-12" style="max-width: 640px;">
         <div class="card-content">
           <div class="has-text-centered">
-            <img src="@/assets/images/top.png" alt="top">
+            <img v-if="mode == 0" src="@/assets/images/single.png" alt="top">
+            <img v-if="mode == 1" src="@/assets/images/multi.png" alt="top">
           </div>
           <div class="field">
-            <label for="theme" class="label">ブレストすること</label>
+            <label for="" class="label">モード</label>
+            <div class="tabs is-toggle is-fullwidth">
+              <ul>
+                <li :class="{ 'is-active': mode == 0 }" @click="$store.commit('settings/set_mode', 0)">
+                  <a>ひとりでブレスト</a>
+                </li>
+                <li :class="{ 'is-active': mode == 1 }" @click="$store.commit('settings/set_mode', 1)">
+                  <a>みんなでブレスト</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="field">
+            <label for="theme" class="label">テーマ</label>
             <div class="control">
               <input  type="text"
                       :value="theme"
@@ -20,7 +34,7 @@
             <p v-if="error_theme" class="has-text-danger">{{ error_theme }}</p>
           </div>
           <div class="field">
-            <label for="limit_time" class="label">ブレスト時間（分）</label>
+            <label for="limit_time" class="label">制限時間（分）</label>
             <div class="control">
               <input  type="number"
                       :value="limit_time"
@@ -43,17 +57,42 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex';
+import { mapMutations } from 'vuex'
+import io from 'socket.io-client'
 
 export default {
   data: () => ({
     error_theme: "",
-    error_limit_time: ""
+    error_limit_time: "",
+    socket: ''
   }),
   mounted() {
     this.$refs.input_theme.focus()
+    // ソケット通信を始める
+    this.socket = io(`${process.env.base_url}:3001`)
+    // craete-roomの結果を受け取る
+    this.socket.on('reply-check-room', (res, room_id) => {
+      if (res) {
+        this.socket.emit('create-room', room_id, this.$refs.input_theme.value.trim(), this.$refs.input_limit_time.value * 60)
+        this.$router.push(`bs/${room_id}`)
+      } else {
+        this.create_room()
+      }
+    })
+    // ウィンドウを閉じたときにルームから立ち去る
+    window.onbeforeunload = () => {
+      this.socket.close()
+    }
+  },
+  // ページ遷移したときにルームから立ち去る
+  beforeRouteLeave(to, from, next) {
+    this.socket.close()
+    next()
   },
   computed: {
+    mode() {
+      return this.$store.state.settings.mode
+    },
     theme() {
       return this.$store.state.settings.theme
     },
@@ -64,7 +103,7 @@ export default {
   methods: {
     start() {
       this.reset_error()
-      this.$store.commit('settings/set_theme', this.$refs.input_theme.value)
+      this.$store.commit('settings/set_theme', this.$refs.input_theme.value.trim())
       this.$store.commit('settings/set_limit_time', this.$refs.input_limit_time.value)
       if (this.limit_time < 1 || this.limit_time > 30) {
         this.error_limit_time = "1〜30で入力して！"
@@ -75,8 +114,16 @@ export default {
         this.$refs.input_theme.focus()
       }
       if (!this.error_theme && !this.error_limit_time) {
-        this.$router.push("/action")
+        if (this.mode == 0) {
+          this.$router.push("/bs")
+        } else if (this.mode == 1) {
+          this.create_room()
+        }
       }
+    },
+    create_room() {
+      const room_id = Math.floor( Math.random() * 100000000 )
+      this.socket.emit('check-room', room_id)
     },
     reset_error() {
       this.error_theme = ""
@@ -85,6 +132,3 @@ export default {
   }
 }
 </script>
-
-<style>
-</style>

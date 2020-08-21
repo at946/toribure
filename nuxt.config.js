@@ -10,6 +10,9 @@ export default {
   ** See https://nuxtjs.org/api/configuration-target
   */
   target: 'server',
+  env: {
+    base_url: process.env.BASE_URL || 'http://localhost'
+  },
   /*
   ** Headers of the page
   ** See https://nuxtjs.org/api/configuration-head
@@ -62,7 +65,7 @@ export default {
   */
   modules: [
     // Doc: https://github.com/nuxt-community/modules/tree/master/packages/bulma
-    // '@nuxtjs/bulma',
+    'nuxt-material-design-icons',
   ],
   /*
   ** Build configuration
@@ -76,5 +79,8 @@ export default {
         }
       }
     },
+  },
+  serverMiddleware: {
+    'api': '~/api'
   }
 }

@@ -14,7 +14,10 @@
     "@nuxtjs/google-analytics": "^2.4.0",
     "node-sass": "^4.14.1",
     "nuxt": "^2.14.0",
-    "sass-loader": "^9.0.3"
+    "nuxt-material-design-icons": "^1.0.4",
+    "sass-loader": "^9.0.3",
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0"
   },
   "devDependencies": {}
 }
