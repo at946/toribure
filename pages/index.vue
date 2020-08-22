@@ -1,56 +1,60 @@
 <template>
-    <div class="columns is-multiline is-mobile is-vcentered is-centered my-0" style="height: 100%;">
-      <div class="column is-12" style="max-width: 640px;">
-        <div class="card-content">
-          <div class="has-text-centered">
-            <img v-if="mode == 0" src="@/assets/images/single.png" alt="top">
-            <img v-if="mode == 1" src="@/assets/images/multi.png" alt="top">
-          </div>
-          <div class="field">
-            <label for="" class="label">モード</label>
-            <div class="tabs is-toggle is-fullwidth">
-              <ul>
-                <li :class="{ 'is-active': mode == 0 }" @click="$store.commit('settings/set_mode', 0)">
-                  <a>ひとりでブレスト</a>
-                </li>
-                <li :class="{ 'is-active': mode == 1 }" @click="$store.commit('settings/set_mode', 1)">
-                  <a>みんなでブレスト</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="field">
-            <label for="theme" class="label">テーマ</label>
-            <div class="control">
-              <input  type="text"
-                      :value="theme"
-                      class="input"
-                      name="theme"
-                      ref="input_theme"
-                      autofocus
-                      placeholder="ブレストしたいことを入力！"
-                      :class="{ 'is-danger': error_theme }">
-            </div>
-            <p v-if="error_theme" class="has-text-danger">{{ error_theme }}</p>
-          </div>
-          <div class="field">
-            <label for="limit_time" class="label">制限時間（分）</label>
-            <div class="control">
-              <input  type="number"
-                      :value="limit_time"
-                      class="input"
-                      name="limit_time"
-                      ref="input_limit_time"
-                      :class="{ 'is-danger': error_limit_time }"
-                      placeholder="1~30分で設定できます！">
-            </div>
-            <p v-if="error_limit_time" class="has-text-danger">{{ error_limit_time }}</p>
-          </div>
-          <div class="has-text-centered my-5">
-            <button class="button is-primary is-rounded is-outlined" @click="start">スタート</button>
-            <p class="has-text-grey my-3">ブレスト中にリロードすると<br class="is-hidden-tablet">消えちゃうから注意してね</p>
+  <div style="height: 100%; display: grid; place-items: center;">
+    <div style="max-width: 640px;">
+      <div class="has-text-centered">
+        <img v-if="mode == 0" src="@/assets/images/single.png" alt="mode image">
+        <img v-else src="@/assets/images/multi.png" alt="mode image">
+      </div>
+      <div class="field">
+        <label for="mode" class="label">モード</label>
+        <div class="control">
+          <div class="control">
+            <label class="radio">
+              <input type="radio" name="foobar" v-model="mode" value=0>
+              ひとりでブレスト
+            </label>
+            <label class="radio">
+              <input type="radio" name="foobar" v-model="mode" value=1>
+              みんなでブレスト
+            </label>
           </div>
         </div>
+      </div>
+      <div class="field">
+        <label for="theme" class="label">テーマ</label>
+        <div class="control">
+          <input  type="text" 
+                  class="input"
+                  :class="{ 'is-danger': errors.theme }"
+                  ref="theme"
+                  :value="theme"
+                  placeholder="ブレストしたいこと"
+                  @change="$store.commit('setting/set_theme', $event.target.value)"
+          >
+        <p v-if="errors.theme" class="has-text-danger">{{ errors.theme }}</p>
+        </div>
+      </div>
+      <div class="field">
+        <label for="limit_time" class="label">制限時間<small>（分）</small></label>
+        <div class="control">
+          <input  type="number"
+                  class="input"
+                  :class="{ 'is-danger': errors.limit_time }"
+                  ref='limit_time'
+                  :value="limit_time"
+                  placehodler="最大30分"
+                  @change="$store.commit('setting/set_limit_time', Number($event.target.value))"
+          >
+        </div>
+        <p v-if="errors.limit_time" class="has-text-danger">{{ errors.limit_time }}</p>
+      </div>
+      <div class="has-text-centered my-5">
+        <p v-if="errors.room" class="has-text-danger has-text-weight-bold">{{ errors.room }}</p>
+        <button class="button is-primary is-rounded is-outlined" @click="start">
+          <span v-if="mode == 0">スタート</span>
+          <span v-else>部屋を作る</span>
+        </button>
+        <p class="has-text-grey my-3">ブレスト中にリロードすると<br class="is-hidden-tablet">消えちゃうから注意してね</p>
       </div>
     </div>
   </div>
@@ -62,73 +66,52 @@ import io from 'socket.io-client'
 
 export default {
   data: () => ({
-    error_theme: "",
-    error_limit_time: "",
-    socket: ''
+    mode: 0,
+    errors: {/* el: msg */},
   }),
-  mounted() {
-    this.$refs.input_theme.focus()
-    // ソケット通信を始める
-    this.socket = io(`${process.env.base_url}:3001`)
-    // craete-roomの結果を受け取る
-    this.socket.on('reply-check-room', (res, room_id) => {
-      if (res) {
-        this.socket.emit('create-room', room_id, this.$refs.input_theme.value.trim(), this.$refs.input_limit_time.value * 60)
-        this.$router.push(`bs/${room_id}`)
-      } else {
-        this.create_room()
-      }
-    })
-    // ウィンドウを閉じたときにルームから立ち去る
-    window.onbeforeunload = () => {
-      this.socket.close()
-    }
-  },
-  // ページ遷移したときにルームから立ち去る
-  beforeRouteLeave(to, from, next) {
-    this.socket.close()
-    next()
-  },
+
   computed: {
-    mode() {
-      return this.$store.state.settings.mode
-    },
-    theme() {
-      return this.$store.state.settings.theme
-    },
-    limit_time() {
-      return this.$store.state.settings.limit_time
-    }
+    theme() { return this.$store.state.setting.theme },
+    limit_time() { return this.$store.state.setting.limit_time },
   },
+
   methods: {
     start() {
-      this.reset_error()
-      this.$store.commit('settings/set_theme', this.$refs.input_theme.value.trim())
-      this.$store.commit('settings/set_limit_time', this.$refs.input_limit_time.value)
-      if (this.limit_time < 1 || this.limit_time > 30) {
-        this.error_limit_time = "1〜30で入力して！"
-        this.$refs.input_limit_time.focus()
+      this.errors = {}
+      // validation begin
+      if (this.limit_time > 30 || this.limit_time < 1) {
+        this.$set(this.errors, 'limit_time', '1分から30分の間から選んでね！')
+        this.$refs.limit_time.focus()
       }
+
       if (!this.theme) {
-        this.error_theme = "入力して！"
-        this.$refs.input_theme.focus()
+        this.$set(this.errors, 'theme', 'テーマを決めてね！')
+        this.$refs.theme.focus()
       }
-      if (!this.error_theme && !this.error_limit_time) {
-        if (this.mode == 0) {
-          this.$router.push("/bs")
-        } else if (this.mode == 1) {
-          this.create_room()
-        }
+
+      if (Object.keys(this.errors).length) {
+        return
       }
-    },
-    create_room() {
-      const room_id = Math.floor( Math.random() * 100000000 )
-      this.socket.emit('check-room', room_id)
-      console.log(`create_room ${room_id}`)
-    },
-    reset_error() {
-      this.error_theme = ""
-      this.error_limit_time = ""
+      // validation end
+
+      if (this.mode == 0) {
+        // ひとりでブレスト開始
+        this.$router.push('/bs')
+      } else {
+        // みんなでブレスト開始
+        const socket = io()
+        // create-roomの結果を受け取る
+        socket.on('reply-for-create-room', (result, room_id) => {
+          if (result) {
+            this.$router.push(`/bs/${room_id}`)
+          } else {
+            this.$set(this.errors, 'room', 'お部屋が混み合ってるみたい。少し時間をおいてみて！')
+          }
+          socket.close()
+        })
+        // create-roomを送信する
+        socket.emit('create-room', this.theme, this.limit_time)
+      }
     }
   }
 }

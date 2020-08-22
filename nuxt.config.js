@@ -1,21 +1,8 @@
 
-export default {
-  /*
-  ** Nuxt rendering mode
-  ** See https://nuxtjs.org/api/configuration-mode
-  */
+module.exports = {
   mode: 'universal',
   /*
-  ** Nuxt target
-  ** See https://nuxtjs.org/api/configuration-target
-  */
-  target: 'server',
-  env: {
-    base_url: process.env.BASE_URL || 'http://localhost'
-  },
-  /*
   ** Headers of the page
-  ** See https://nuxtjs.org/api/configuration-head
   */
   head: {
     title: process.env.npm_package_name || '',
@@ -38,22 +25,20 @@ export default {
     ]
   },
   /*
+  ** Customize the progress-bar color
+  */
+  loading: { color: '#fff' },
+  /*
   ** Global CSS
   */
   css: [
-    { src: '~assets/css/main.scss', lang: 'scss' }
+    { src: '@/assets/css/main.scss', lang: 'scss' }
   ],
   /*
   ** Plugins to load before mounting the App
-  ** https://nuxtjs.org/guide/plugins
   */
   plugins: [
   ],
-  /*
-  ** Auto import components
-  ** See https://nuxtjs.org/api/configuration-components
-  */
-  components: true,
   /*
   ** Nuxt.js dev-modules
   */
@@ -64,12 +49,10 @@ export default {
   ** Nuxt.js modules
   */
   modules: [
-    // Doc: https://github.com/nuxt-community/modules/tree/master/packages/bulma
     'nuxt-material-design-icons',
   ],
   /*
   ** Build configuration
-  ** See https://nuxtjs.org/api/configuration-build/
   */
   build: {
     postcss: {
@@ -79,8 +62,10 @@ export default {
         }
       }
     },
-  },
-  serverMiddleware: {
-    'api': '~/api'
+    /*
+    ** You can extend webpack config here
+    */
+    extend (config, ctx) {
+    }
   }
 }

@@ -1,5 +1,7 @@
 # toribure
 
+> My first-class Nuxt.js project
+
 ## Build Setup
 
 ```bash

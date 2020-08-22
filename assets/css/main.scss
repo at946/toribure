@@ -1,13 +1,23 @@
+// Bulma's initial setting
 @import '~bulma/sass/utilities/initial-variables';
 $primary: #F6A71B;
-// $navbar-breakpoint: 10000;
 @import '~bulma/bulma';
 
 // Google fonts
-// @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap');
 
 body {
-  // font-family: 'Noto Sans JP', sans-serif;
   font-family: 'M PLUS Rounded 1c', sans-serif;
+}
+
+.bs-pancake-parent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bs-pancake-child {
+  flex-grow: 1;
+  flex-basis: 0;
+  overflow-y: scroll;
 }
