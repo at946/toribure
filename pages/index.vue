@@ -8,16 +8,22 @@
       <div class="field">
         <label for="mode" class="label">モード</label>
         <div class="control">
-          <div class="control">
-            <label class="radio">
-              <input type="radio" name="foobar" v-model="mode" value=0>
-              ひとりでブレスト
-            </label>
-            <label class="radio">
-              <input type="radio" name="foobar" v-model="mode" value=1>
-              みんなでブレスト
-            </label>
-          </div>
+          <label class="radio">
+            <input  type="radio"
+                    name="foobar"
+                    v-model="mode"
+                    value=0
+            >
+            ひとりでブレスト
+          </label>
+          <label class="radio">
+            <input  type="radio"
+                    name="foobar"
+                    v-model="mode"
+                    value=1
+            >
+            みんなでブレスト
+          </label>
         </div>
       </div>
       <div class="field">
@@ -27,9 +33,8 @@
                   class="input"
                   :class="{ 'is-danger': errors.theme }"
                   ref="theme"
-                  :value="theme"
+                  v-model.trim="theme"
                   placeholder="ブレストしたいこと"
-                  @change="$store.commit('setting/set_theme', $event.target.value)"
           >
         <p v-if="errors.theme" class="has-text-danger">{{ errors.theme }}</p>
         </div>
@@ -41,16 +46,15 @@
                   class="input"
                   :class="{ 'is-danger': errors.limit_time }"
                   ref='limit_time'
-                  :value="limit_time"
+                  v-model.number="limit_time"
                   placehodler="最大30分"
-                  @change="$store.commit('setting/set_limit_time', Number($event.target.value))"
           >
         </div>
         <p v-if="errors.limit_time" class="has-text-danger">{{ errors.limit_time }}</p>
       </div>
       <div class="has-text-centered my-5">
         <p v-if="errors.room" class="has-text-danger has-text-weight-bold">{{ errors.room }}</p>
-        <button class="button is-primary is-rounded is-outlined" @click="start">
+        <button class="button is-primary is-rounded" @click="start">
           <span v-if="mode == 0">スタート</span>
           <span v-else>部屋を作る</span>
         </button>
@@ -66,13 +70,22 @@ import io from 'socket.io-client'
 
 export default {
   data: () => ({
-    mode: 0,
     errors: {/* el: msg */},
   }),
 
   computed: {
-    theme() { return this.$store.state.setting.theme },
-    limit_time() { return this.$store.state.setting.limit_time },
+    mode: {
+      get()       { return this.$store.state.setting.mode },
+      set(value)  { this.$store.commit('setting/set_mode', value) }
+    },
+    theme: {
+      get()       { return this.$store.state.setting.theme },
+      set(value)  { this.$store.commit('setting/set_theme', value.trim()) }
+    },
+    limit_time: {
+      get()       { return this.$store.state.setting.limit_time },
+      set(value)  { this.$store.commit('setting/set_limit_time', Number(value)) }
+    }
   },
 
   methods: {

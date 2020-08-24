@@ -1,6 +1,7 @@
 {
   "name": "toribure",
   "version": "1.0.0",
+  "display_name": "toribure | ひとりでもチームでも使えるシンプルイズベストなブレストツール",
   "description": "toribureはシンプルイズベストなブレストツールです！ひとりでするもよし、みんなでするもよし。ビジネスのアイデア出しやプライベートのお悩み解決も「とりあえずブレスト」してみましょう！",
   "author": "at946",
   "private": true,
