@@ -1,6 +1,6 @@
 <template>
   <div style="height: 100%; display: grid; place-items: center;">
-    <div style="max-width: 640px;">
+    <section class="section" style="max-width: 640px;">
       <div class="has-text-centered">
         <img v-if="mode == 0" src="@/assets/images/single.png" alt="mode image">
         <img v-else src="@/assets/images/multi.png" alt="mode image">
@@ -60,7 +60,7 @@
         </button>
         <p class="has-text-grey my-3">ブレスト中にリロードすると<br class="is-hidden-tablet">消えちゃうから注意してね</p>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 

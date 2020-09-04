@@ -34,18 +34,17 @@ async function start () {
 }
 
 function socketStart(server) {
-  const rooms = [] /* id, theme, limit_time, idea_count */
+  const rooms = [] /* id, theme, limit_time, ideas{id, text}, counter */
   const io = require('socket.io').listen(server)
 
   io.on('connection', (socket) => {
-    console.log(`socket ${socket.id} connected.`)
 
     // ルーム作成
     socket.on('create-room', (theme, limit_time)  => {
       const repeat_count = 10
       for (let i = 0; i < repeat_count; i++) {
         const room_id = Math.floor( Math.random() * 100000000 )
-        // まだ存在しないroom_idになったらルームを作る
+        // まだsocket roomsに存在しないroom_idになったらルームを作る
         if (!io.sockets.adapter.rooms[room_id]) {
           // もしroomsに同じroom_idのオブジェクトが残っていたら削除する
           rooms.filter((room, index) => {
@@ -58,17 +57,16 @@ function socketStart(server) {
             id: room_id,
             theme: theme,
             limit_time: limit_time,
-            idea_count: 0
+            ideas: [],
+            counter: 0
           })
           // clientにroom_idを通知する
           io.to(socket.id).emit('reply-for-create-room', true, room_id)
-          console.log(`socket ${socket.id} created room ${room_id}.`)
           break
         }
         if (i == repeat_count - 1) {
           // repeat_count中にルームを作れなかったら、clientにルーム作成の失敗を通知する
           io.to(socket.id).emit('reply-for-create-room', false, null)
-          console.log(`socket ${socket.id} failed to create room.`)
         }
       }
     })
@@ -79,11 +77,10 @@ function socketStart(server) {
       if (room) {
         socket.join(room_id)
         io.to(socket.id).emit('reply-for-join-room', true, room.theme, room.limit_time)
+        io.to(socket.id).emit('update-ideas', room.ideas)
         io.in(room_id).emit('update-members', io.sockets.adapter.rooms[room_id].length)
-        console.log(`socket ${socket.id} joined room ${room_id}`)
       } else {
         io.to(socket.id).emit('reply-for-join-room', false, null, null)
-        console.log(`socket ${socket.id} failed to join room ${room_id}`)
       }
     })
 
@@ -93,7 +90,6 @@ function socketStart(server) {
       if (room) {
         socket.leave(room_id)
         socket.to(room_id).emit('update-members', room.length)
-        console.log(`socket ${socket} left from room ${room_id}`)
 
         if (room.length < 1) {
           rooms.filter((room, index) => {
@@ -103,33 +99,45 @@ function socketStart(server) {
           })
         }
       } else {
-        console.log(`socket ${socket} failed to leave from room ${room_id}`)
       }
     })
 
     // ブレストを開始する
     socket.on('start', room_id => {
       io.in(room_id).emit('start')
-      console.log(`socket ${socket} started to bs on room ${room_id}`)
     })
 
     // アイデアを追加する
     socket.on('add-idea', (room_id, idea) => {
       const room = rooms.find((room) => room.id == room_id)
-      io.in(room_id).emit('add-idea',
-        {
-          id: `${socket.id}-${room.idea_count}`,
-          text: idea
-        }
-      )
-      room.idea_count++
-      console.log(`socket ${socket.id} add idea ${idea} to room ${room_id}`)
+      room.ideas.push({
+        id: `${socket.id}-${room.counter++}`,
+        text: idea
+      })
+      io.in(room_id).emit('update-ideas', room.ideas)
     }) 
+
+    // アイデアの順番を入れ替える
+    socket.on('sort-idea', (room_id, idea_id, new_index) => {
+      const room = rooms.find((room) => room.id == room_id)
+      room.ideas.filter((idea, index) => {
+        if (idea.id == idea_id) {
+          room.ideas.splice(index, 1)
+          room.ideas.splice(new_index, 0, idea)
+        }
+      })
+      io.in(room_id).emit('update-ideas', room.ideas)
+    })
 
     // アイデアを削除する
     socket.on('remove-idea', (room_id, idea_id) => {
-      io.in(room_id).emit('remove-idea', idea_id)
-      console.log(`socket ${socket.id} remove idea ${idea_id} from room ${room_id}`)
+      const room = rooms.find((room) => room.id == room_id)
+      room.ideas.filter((idea, index) => {
+        if (idea.id == idea_id) {
+          room.ideas.splice(index, 1)
+        }
+      })
+      io.in(room_id).emit('update-ideas', room.ideas)
     })
   })
 }

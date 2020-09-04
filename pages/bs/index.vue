@@ -7,14 +7,14 @@
     />
 
     <section class="section py-5 bs-pancake-child" ref="ideas_area">
-      <div class="columns is-multiline is-centered">
-        <div class="column is-narrow" v-for="(idea, index) in ideas" :key="index">
+      <draggable element="div" class="columns is-multiline is-centered" v-model="ideas" animation=200 delay=50>
+        <div class="column is-narrow" style="cursor: pointer;" v-for="(idea, index) in ideas" :key="index">
           <div class="notification is-success is-light">
             <button class="delete" @click="remove_idea(index)"></button>
             {{ idea.text }}
           </div>
         </div>
-      </div>
+      </draggable>
     </section>
 
     <InputIdea  @add_idea="add_idea" />
@@ -26,6 +26,7 @@
 import { mapMutations } from 'vuex'
 import BSHeader from '@/components/BSHeader.vue'
 import InputIdea from '@/components/InputIdea.vue'
+import draggable from 'vuedraggable'
 
 export default {
   data: () => ({
@@ -43,7 +44,8 @@ export default {
 
   components: {
     BSHeader,
-    InputIdea
+    InputIdea,
+    draggable
   },
 
   mounted() {

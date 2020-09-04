@@ -16,14 +16,14 @@
     </div>
     
     <section class="section py-5 bs-pancake-child" ref="ideas_area">
-      <div class="columns is-multiline is-centered">
-        <div class="column is-narrow" v-for="idea in ideas" :key="idea.id">
+      <draggable element="div" class="columns is-multiline is-centered" v-model="ideas" animation=200 delay=50 @end="sort_idea">
+        <div class="column is-narrow" style="cursor: pointer;" v-for="idea in ideas" :key="idea.id">
           <div class="notification is-success is-light">
             <button class="delete" @click="remove_idea(idea.id)"></button>
             {{ idea.text }}
           </div>
         </div>
-      </div>
+      </draggable>
     </section>
 
     <InputIdea  @add_idea="add_idea" />
@@ -36,6 +36,7 @@
 import io from 'socket.io-client'
 import BSHeader from '@/components/BSHeader.vue'
 import InputIdea from '@/components/InputIdea.vue'
+import draggable from 'vuedraggable'
 
 export default {
   data: () => ({
@@ -52,7 +53,8 @@ export default {
 
   components: {
     BSHeader,
-    InputIdea
+    InputIdea,
+    draggable
   },
 
   mounted() {
@@ -67,14 +69,20 @@ export default {
         this.$router.push("/")
       }
     })
-    
-    // ルームに参加する
-    this.socket.emit('join-room', this.$route.params.id)
-    
+
     // メンバー数更新を受け取る
     this.socket.on('update-members', count => {
       this.member_count = count
     })
+
+    // ideasの更新を受け取る
+    this.socket.on('update-ideas', ideas => {
+      this.ideas = ideas
+    })
+    
+    // ルームに参加する
+    this.socket.emit('join-room', this.$route.params.id)
+    
 
     // ブレスト開始を受け取る
     this.socket.on('start', () => {
@@ -82,20 +90,6 @@ export default {
         this.is_started = true
         this.$refs.BSHeader.start_timer()
       }
-    })
-
-    // 新しいアイデアを受け取る
-    this.socket.on('add-idea', idea => {
-      this.ideas.push(idea)
-    })
-    
-    // アイデアを削除する
-    this.socket.on('remove-idea', idea_id => {
-      this.ideas.filter((idea, index) => {
-        if (idea.id == idea_id) {
-          this.ideas.splice(index, 1)
-        }
-      })
     })
 
     // ウィンドウを閉じたときにルームから立ち去る
@@ -123,6 +117,10 @@ export default {
 
     remove_idea(idea_id) {
       this.socket.emit('remove-idea', this.$route.params.id, idea_id)
+    },
+
+    sort_idea(event) {
+      this.socket.emit('sort-idea', this.$route.params.id, this.ideas[event.newIndex].id, event.newIndex)
     }
   }
 }

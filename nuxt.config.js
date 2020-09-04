@@ -39,6 +39,7 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: [
+    // "@/plugins/vue-draggable"
   ],
   /*
   ** Nuxt.js dev-modules
