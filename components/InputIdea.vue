@@ -1,16 +1,14 @@
 <template>
-  <section class="section columns is-centered py-5">
-    <div class="column" style="max-width: 640px;">
-      <div class="field">
-        <div class="control">
-          <input  type="text"
-                  class="input is-primary has-text-centered"
-                  ref="idea"
-                  v-model="idea"
-                  placeholder="アイデアを出しまくろう！"
-                  @keypress.enter.exact="add_idea"
-          >
-        </div>
+  <section class="section py-5">
+    <div class="field" style="max-width: 640px; margin-right: auto; margin-left: auto;">
+      <div class="control">
+        <input  type="text"
+                class="input is-primary has-text-centered"
+                ref="idea"
+                v-model="idea"
+                placeholder="アイデアを出しまくろう！"
+                @keypress.enter.exact="add_idea"
+        >
       </div>
     </div>
   </section>

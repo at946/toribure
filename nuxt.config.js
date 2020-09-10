@@ -52,6 +52,7 @@ module.exports = {
   */
   modules: [
     'nuxt-material-design-icons',
+    'nuxt-clipboard2',
   ],
   /*
   ** Build configuration

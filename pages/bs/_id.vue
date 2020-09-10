@@ -15,6 +15,8 @@
       <i v-if="!is_started" class="material-icons has-text-success" style="cursor: pointer;" @click="start()">play_circle_outline</i>
     </div>
     
+    <CopyResultButton :ideas="ideas" :theme="theme" />
+
     <section class="section py-5 bs-pancake-child" ref="ideas_area">
       <draggable element="div" class="columns is-multiline is-centered" v-model="ideas" animation=200 delay=50 @end="sort_idea">
         <div class="column is-narrow" style="cursor: pointer;" v-for="idea in ideas" :key="idea.id">
@@ -35,6 +37,7 @@
 <script>
 import io from 'socket.io-client'
 import BSHeader from '@/components/BSHeader.vue'
+import CopyResultButton from '@/components/CopyResultButton.vue'
 import InputIdea from '@/components/InputIdea.vue'
 import draggable from 'vuedraggable'
 
@@ -53,6 +56,7 @@ export default {
 
   components: {
     BSHeader,
+    CopyResultButton,
     InputIdea,
     draggable
   },

@@ -1,8 +1,8 @@
 {
   "name": "toribure",
   "version": "1.0.0",
-  "display_name": "toribure | ひとりでもチームでも使えるシンプルイズベストなブレストツール",
-  "description": "toribureはシンプルイズベストなブレストツールです！ひとりでするもよし、みんなでするもよし。ビジネスのアイデア出しやプライベートのお悩み解決も「とりあえずブレスト」してみましょう！",
+  "display_name": "toribure | ひとりでもチームでも使えるシンプルなブレストツール",
+  "description": "toribureはとてもシンプルなブレストツールです！ひとりでもチームでも、ブラウザだけで簡単にブレインストーミングすることができます。ビジネスのアイデア出しやプライベートのお悩み解決も「とりあえずブレスト」してみましょう！",
   "author": "at946",
   "private": true,
   "scripts": {
@@ -18,6 +18,7 @@
     "express": "^4.16.4",
     "node-sass": "^4.14.1",
     "nuxt": "^2.0.0",
+    "nuxt-clipboard2": "^0.2.1",
     "nuxt-material-design-icons": "^1.0.4",
     "sass-loader": "^9.0.3",
     "socket.io": "^2.3.0",
