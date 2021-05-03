@@ -1,15 +1,3 @@
-// Bulma's initial setting
-@import '~bulma/sass/utilities/initial-variables';
-$primary: #F6A71B;
-@import '~bulma/bulma';
-
-// Google fonts
-@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap');
-
-body {
-  font-family: 'M PLUS Rounded 1c', sans-serif;
-}
-
 .bs-pancake-parent {
   display: flex;
   flex-direction: column;

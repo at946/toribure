@@ -53,6 +53,9 @@ module.exports = {
   modules: [
     'nuxt-material-design-icons',
     'nuxt-clipboard2',
+    ['nuxt-fontawesome', {
+      component: 'fa'
+    }]
   ],
   /*
   ** Build configuration

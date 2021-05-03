@@ -40,7 +40,7 @@ function socketStart(server) {
   io.on('connection', (socket) => {
 
     // ルーム作成
-    socket.on('create-room', (theme, limit_time)  => {
+    socket.on('create-room', ()  => {
       const repeat_count = 10
       for (let i = 0; i < repeat_count; i++) {
         const room_id = Math.floor( Math.random() * 100000000 )
@@ -55,20 +55,26 @@ function socketStart(server) {
           // roomsにroom情報を追加する
           rooms.push({
             id: room_id,
-            theme: theme,
-            limit_time: limit_time,
             ideas: [],
             counter: 0
           })
           // clientにroom_idを通知する
-          io.to(socket.id).emit('reply-for-create-room', true, room_id)
+          io.to(socket.id).emit('reply-for-create-room', { isCreated: true, room_id: room_id })
           break
         }
         if (i == repeat_count - 1) {
           // repeat_count中にルームを作れなかったら、clientにルーム作成の失敗を通知する
-          io.to(socket.id).emit('reply-for-create-room', false, null)
+          io.to(socket.id).emit('reply-for-create-room', { isCreated: false })
         }
       }
+    })
+
+    // テーマを設定
+    socket.on('set-theme', req => {
+      // req = { room_id, theme }
+      const room = rooms.find((room) => room.id == req.room_id)
+      room.theme = req.theme
+      io.in(room.id).emit('update-theme', { theme: room.theme })
     })
 
     // ルームに参加
@@ -108,13 +114,14 @@ function socketStart(server) {
     })
 
     // アイデアを追加する
-    socket.on('add-idea', (room_id, idea) => {
-      const room = rooms.find((room) => room.id == room_id)
+    socket.on('add-idea', req => {
+      // req = { room_id, idea }
+      const room = rooms.find((room) => room.id == req.room_id)
       room.ideas.push({
         id: `${socket.id}-${room.counter++}`,
-        text: idea
+        text: req.idea
       })
-      io.in(room_id).emit('update-ideas', room.ideas)
+      io.in(room.id).emit('update-ideas', room.ideas)
     }) 
 
     // アイデアの順番を入れ替える

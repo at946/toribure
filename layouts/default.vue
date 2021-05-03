@@ -1,7 +1,7 @@
 <template>
-  <div style="display: flex; flex-direction: column; height: 100vh;">
+  <div class="body">
     <Header />
-    <main style="flex: 1;"><Nuxt /></main>
+    <main class="main px-4"><Nuxt /></main>
     <Footer />
   </div>
 </template>
@@ -17,3 +17,53 @@ export default {
   } 
 }
 </script>
+
+<style lang="scss">
+@import '@/assets/css/destyle.css';
+@import '@/assets/css/_color.scss';
+@import '@/assets/css/_spacing.scss';
+
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap');
+
+body {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  text-align: center;
+  color: $black;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main {
+  flex: 1;
+}
+
+button {
+  &:focus {
+    outline: solid 2px $blue;
+  }
+}
+
+.button {
+  @extend .bg-primary;
+  color: white;
+  @extend .py-2;
+  @extend .px-4;
+  border-radius: 2rem;
+
+  &:hover, &:focus {
+    background: darken($primary, 10%);
+  }
+}
+
+a {
+  display: inline-block;
+
+  &:focus {
+    outline: solid 2px $blue;
+  }
+}
+</style>
