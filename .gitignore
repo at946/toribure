@@ -92,3 +92,4 @@ sw.*
 .pki
 .config
 .editorconfig
+.nuxtrc
