@@ -39,6 +39,10 @@ body {
 
 .main {
   flex: 1;
+  width: 100%;
+  max-width: 1080px;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 button {

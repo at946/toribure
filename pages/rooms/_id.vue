@@ -9,6 +9,7 @@
     </div>
 
     <div class="mb-5">
+      {{ /* ブレストテーマのテキストフィールド */ }}
       <input
         type="text"
         v-model="theme"
@@ -21,7 +22,8 @@
       />
     </div>
 
-    <div class="mb-5">
+    <div class="mb-3">
+      {{ /* アイデアのテキストフィールド */ }}
       <input
         type="text"
         v-model="idea"
@@ -31,10 +33,18 @@
       />
     </div>
 
+    <div class="select-mode mb-2">
+      {{ /* 「個人ワークモード」「グループワークモード」選択ボックス */ }}
+      <select v-model="mode" @change="updateMode">
+        <option value="0">個人ワークモード</option>
+        <option value="1">グループワークモード</option>
+      </select>
+    </div>
+
     <div class="mb-4" ref="ideas_area">
       <draggable element="div" class="ideas" v-model="ideas" animation=200 delay=50 @end="sort_idea">
-        <div v-for="idea in ideas.slice().reverse()" :key="idea.id">
-          <div class="m-1 py-1 px-2 idea pointer" :class="idea.id.indexOf(socket.id) === 0 ? 'my-idea' : 'others-idea'">
+        <div v-for="idea in ideas" :key="idea.id">
+          <div v-if="mode != 0 || idea.id.indexOf(socket.id) === 0" class="m-1 py-1 px-2 idea pointer" :class="idea.id.indexOf(socket.id) === 0 ? 'my-idea' : 'others-idea'">
             <span class="mr-1">{{ idea.text }}</span>
             <button @click="remove_idea(idea.id)"><fa :icon="faTimes" /></button>
           </div>
@@ -42,7 +52,7 @@
       </draggable>
     </div>
 
-    <div v-if="ideas.length">
+    <div v-if="(mode == 0 && myIdeas.length > 0) || (mode == 1 && ideas.length > 0)">
       <button class="button is-text" @click="copyIdeas">結果をコピー</button>
     </div>
 
@@ -62,11 +72,16 @@ export default {
       member_count: 0,
       idea: '',
       ideas: [],
-      is_started: false
+      is_started: false,
+      mode: 0 // 0: individual work, 1: group work
     }
   },
 
   computed: {
+    myIdeas() {
+      return this.ideas.filter(el => {
+        return ( el.id.indexOf(this.socket.id) === 0)
+    })},
     faShare() { return faShare },
     faTimes() { return faTimes }
   },
@@ -81,10 +96,10 @@ export default {
     this.socket = io()
     
     // ルーム参加申請のレスを受け取る
-    this.socket.on('reply-for-join-room', (res, theme, limit_time) => {
-      if (res) {
-        this.theme = theme,
-        this.limit_time = limit_time
+    this.socket.on('reply-for-join-room', res => {
+      if (res.entered) {
+        this.theme = res.theme
+        this.mode = res.mode
       } else {
         this.$router.push("/")
       }
@@ -102,19 +117,23 @@ export default {
 
     // ideasの更新を受け取る
     this.socket.on('update-ideas', ideas => {
-      this.ideas = ideas
+      this.ideas = ideas.slice().reverse()
     })
     
     // ルームに参加する
     this.socket.emit('join-room', this.$route.params.id)
     
-
     // ブレスト開始を受け取る
     this.socket.on('start', () => {
       if (!this.is_started) {
         this.is_started = true
         this.$refs.BSHeader.start_timer()
       }
+    })
+
+    // モードの更新を受け取る
+    this.socket.on('update-mode', req => {
+      this.mode = req.mode
     })
 
     // ウィンドウを閉じたときにルームから立ち去る
@@ -165,12 +184,25 @@ export default {
     },
 
     copyIdeas() {
-      var text = `# ${this.theme}\n\n`
-      this.ideas.forEach((idea) => {
-        text += `- ${idea.text}\n`
-      })
+      var text = ''
+      // テーマが設定されているときは、テーマもコピーする
+      if (!!this.theme) { text += `# ${this.theme}\n\n` }
+      // 個人ワークモードの場合、自分のアイデアだけをコピーする
+      if (this.mode == 0) {
+        this.myIdeas.forEach((idea) => {
+          text += `- ${idea.text}\n`
+        })
+      } else {
+        this.ideas.forEach((idea) => {
+          text += `- ${idea.text}\n`
+        })        
+      }
       this.$copyText(text)
       alert("ブレストの結果をクリップボードにコピーしたよ！")
+    },
+
+    updateMode() {
+      this.socket.emit('update-mode', { room_id: this.$route.params.id, mode: this.mode })
     }
   }
 }
@@ -210,5 +242,21 @@ export default {
 
   .others-idea {
     background: lighten($blue, 30%);
+  }
+
+  .select-mode {
+    text-align: right;
+
+    select {
+      border-bottom: 2px solid lightgrey;
+      padding: 0 .5rem .5rem .5rem;
+      text-align: center;
+      cursor: pointer;
+
+      &:focus {
+        border-color: $primary;
+      }
+    }
+
   }
 </style>

@@ -56,7 +56,8 @@ function socketStart(server) {
           rooms.push({
             id: room_id,
             ideas: [],
-            counter: 0
+            counter: 0,
+            mode: 0
           })
           // clientにroom_idを通知する
           io.to(socket.id).emit('reply-for-create-room', { isCreated: true, room_id: room_id })
@@ -82,11 +83,16 @@ function socketStart(server) {
       const room = rooms.find((room) => room.id == room_id)
       if (room) {
         socket.join(room_id)
-        io.to(socket.id).emit('reply-for-join-room', true, room.theme, room.limit_time)
+        const res = {
+          entered: true,
+          theme: room.theme,
+          mode: room.mode
+        }
+        io.to(socket.id).emit('reply-for-join-room', res)
         io.to(socket.id).emit('update-ideas', room.ideas)
         io.in(room_id).emit('update-members', io.sockets.adapter.rooms[room_id].length)
       } else {
-        io.to(socket.id).emit('reply-for-join-room', false, null, null)
+        io.to(socket.id).emit('reply-for-join-room', { entered: false })
       }
     })
 
@@ -145,6 +151,14 @@ function socketStart(server) {
         }
       })
       io.in(room_id).emit('update-ideas', room.ideas)
+    })
+
+    // モードを更新する
+    socket.on('update-mode', req => {
+      // req = { room_id, mode }
+      const room = rooms.find((room) => room.id == req.room_id)
+      room.mode = req.mode
+      io.in(room.id).emit('update-mode', { mode: room.mode })
     })
   })
 }
